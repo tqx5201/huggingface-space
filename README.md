@@ -11,3 +11,6 @@ pinned: false
 一行话介绍这是干啥的，再贴个 Swagger 链接：
 
 https://huggingface.co/spaces/<你的用户名>/<空间名>
+
+
+https://tqx5201-pyweb.hf.space/
