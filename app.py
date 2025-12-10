@@ -103,7 +103,7 @@ CHANNEL_MAPPING = {
     "litv-longturn22": [5, 2],  # 台灣戲劇台
     "litv-longturn23": [5, 2],  # 寰宇財經台
 }
-@app.get("/id2/{video_id}.m3u8")
+@app.get("/id/{video_id}.m3u8")
 def get_m3u8(video_id: str):
     if video_id not in CHANNEL_MAPPING:
         #logger.error(f"Invalid Video ID: {video_id}")
@@ -126,7 +126,7 @@ def get_m3u8(video_id: str):
     return Response(content=playlist, media_type="text/plain")
 
 
-@app.get("/id/{video_id}/ts/{ts}.ts")
+@app.get("/id2/{video_id}/ts/{ts}.ts")
 def get_ts(video_id: str,ts:str):
     if video_id not in CHANNEL_MAPPING:
         raise HTTPException(status_code=404, detail="channel not found")
