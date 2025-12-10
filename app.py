@@ -126,7 +126,7 @@ def get_m3u8(video_id: str):
     return Response(content=playlist, media_type="text/plain")
 
 
-@app.get("/id2/{video_id}/ts/{ts}.ts")
+@app.get("/id/{video_id}/ts/{ts}.ts")
 def get_ts(video_id: str,ts:str):
     if video_id not in CHANNEL_MAPPING:
         raise HTTPException(status_code=404, detail="channel not found")
@@ -144,6 +144,8 @@ def get_ts(video_id: str,ts:str):
                     yield chunk
 
     return StreamingResponse(iter_bytes(), media_type="video/mp2t")
+    
+    
     
 
 import requests
@@ -165,8 +167,11 @@ def get_ts(video_id: str, ts: str):
             if resp.status_code != 200:
                 raise HTTPException(status_code=resp.status_code)
             for chunk in resp.iter_content(chunk_size=32 * 1024):
-                if chunk:          # 过滤掉 keep-alive 空包
+                if chunk:
                     yield chunk
 
-    return StreamingResponse(iter_bytes(), media_type="video/mp2t")
-
+    headers = {
+        "Content-Type": "video/MP2T",
+        "Content-Disposition": f'attachment; filename="{ts}.ts"'
+    }
+    return StreamingResponse(iter_bytes(), headers=headers)
