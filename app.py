@@ -103,7 +103,7 @@ CHANNEL_MAPPING = {
     "litv-longturn22": [5, 2],  # 台灣戲劇台
     "litv-longturn23": [5, 2],  # 寰宇財經台
 }
-@app.get("/id/{video_id}.m3u8")
+@app.get("/id2/{video_id}.m3u8")
 def get_m3u8(video_id: str):
     if video_id not in CHANNEL_MAPPING:
         #logger.error(f"Invalid Video ID: {video_id}")
@@ -146,5 +146,27 @@ def get_ts(video_id: str,ts:str):
     return StreamingResponse(iter_bytes(), media_type="video/mp2t")
     
 
+import requests
+@app.get("/id/{video_id}/ts/{ts}.ts")
+def get_ts(video_id: str, ts: str):
+    if video_id not in CHANNEL_MAPPING:
+        raise HTTPException(status_code=404, detail="channel not found")
 
+    t = int(ts) * 4
+    url = (
+        f"https://ntd-tgc.cdn.hinet.net/live/pool/{video_id}/litv-pc/"
+        f"{video_id}-avc1_6000000={CHANNEL_MAPPING[video_id][0]}-"
+        f"mp4a_134000_zho={CHANNEL_MAPPING[video_id][1]}-"
+        f"begin={t}0000000-dur=40000000-seq={ts}.ts"
+    )
+
+    def iter_bytes():
+        with requests.get(url, stream=True, timeout=20) as resp:
+            if resp.status_code != 200:
+                raise HTTPException(status_code=resp.status_code)
+            for chunk in resp.iter_content(chunk_size=32 * 1024):
+                if chunk:          # 过滤掉 keep-alive 空包
+                    yield chunk
+
+    return StreamingResponse(iter_bytes(), media_type="video/mp2t")
 
